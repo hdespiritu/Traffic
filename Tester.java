@@ -18,11 +18,14 @@ class TollPlaza {
 	    DrawPanel drawPanel;
 	    int numLanes = 12;
 	    int carsPerLane = 4;
+	    int carDimen = 6; //Car is a square
 	    Car[] carArr = new Car[numLanes*carsPerLane];
 	    
 	    class Car extends Thread {
 	    	private int X;
 		    private int Y;
+		    private int V; //Car velocity
+		    private int laneNum;
 		    
 		    boolean up = false;
 		    boolean down = true;
@@ -30,7 +33,11 @@ class TollPlaza {
 		    boolean right = true;
 		    
 		    Car(int x, int y){
-		    	X = x; Y = y;
+		    	X = x; Y = y; V = 1;
+		    }
+		    
+		    Car(int x, int y, int v){
+		    	X = x; Y = y; V = v;
 		    }
 		    
 		    @Override
@@ -44,8 +51,13 @@ class TollPlaza {
 	    TollPlaza(){
 	    	
 	    	for(int i= 0; i < numLanes; i++){
-	    		for(int j = 0; j < carsPerLane; j++)
-	    		carArr[i*4+j] = new Car(7 + 20*j, 25+20*i);
+	    		for(int j = 0; j < carsPerLane; j++){
+	    			Car tmpCar = new Car(7 + 20*j, 25+20*i);
+		    		tmpCar.laneNum = i;
+		    		carArr[i*4+j] = tmpCar;
+	    		}
+	    		
+	    		
 	    	}
 
 	    }
@@ -86,7 +98,7 @@ class TollPlaza {
 	            g.setColor(Color.BLUE);
 	            g.fillRect(0, 0, this.getWidth(), this.getHeight());
 	            g.setColor(Color.RED);
-	            g.fillRect(3, 3, this.getWidth()-6, this.getHeight()-6);
+	            g.fillRect(3, 3, this.getWidth()-carDimen, this.getHeight()-carDimen);
 	            g.setColor(Color.WHITE);
 	            g.fillRect(6, 6, this.getWidth()-12, this.getHeight()-12);
 	            g.setColor(Color.BLACK);
@@ -104,8 +116,8 @@ class TollPlaza {
 	    private void moveIt(Car car) {
 	        while(true){
 	            if(car.X >= 283){
-	                car.right = false;
-	                car.left = true;
+	                car.X = 0;
+	                car.Y = 25+20*car.laneNum;
 	            }
 	            if(car.X <= 7){
 	                car.right = true;
@@ -132,7 +144,7 @@ class TollPlaza {
 	            	car.X++;
 	            }
 	            try{
-	                Thread.sleep(10);
+	                Thread.sleep(15);
 	            } catch (Exception exc){}
 	            frame.repaint();
 	        }
