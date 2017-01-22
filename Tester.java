@@ -13,7 +13,7 @@ import java.awt.*;
  */
 
 
-class TollPlaza {
+class TollPlaza extends Thread {
 	 	JFrame frame;
 	    DrawPanel drawPanel;
 	    int numLanes = 12;
@@ -21,7 +21,7 @@ class TollPlaza {
 	    int carDimen = 6; //Car is a square
 	    Car[] carArr = new Car[numLanes*carsPerLane];
 	    
-	    class Car extends Thread {
+	    class Car  {
 	    	private int X;
 		    private int Y;
 		    private int V; //Car velocity
@@ -40,13 +40,13 @@ class TollPlaza {
 		    	X = x; Y = y; V = v;
 		    }
 		    
-		    @Override
-		    public void run(){
-		    	moveIt(this);
-		    }
+		    
 	    }
 	    
-	    
+	    @Override
+	    public void run(){
+	    		moveIt(carArr);
+	    }
 	    
 	    TollPlaza(){
 	    	
@@ -79,9 +79,7 @@ class TollPlaza {
 	        frame.setSize(300, 300);
 	        frame.setLocation(375, 55);
 	        
-	        for(int i = 0; i < numLanes*carsPerLane; i++){
-	        	carArr[i].start();
-	        }
+	        this.start();
 
 	    }
 
@@ -93,7 +91,6 @@ class TollPlaza {
 	        	//draw in black
 	            g.setColor(Color.BLACK);
 	            //draw a centered horizontal line
-	            
 	            
 	            g.setColor(Color.BLUE);
 	            g.fillRect(0, 0, this.getWidth(), this.getHeight());
@@ -113,38 +110,40 @@ class TollPlaza {
 	        }
 	    }
 
-	    private void moveIt(Car car) {
+	    private void moveIt(Car[] car) {
 	        while(true){
-	            if(car.X >= 283){
-	                car.X = 0;
-	                car.Y = 25+20*car.laneNum;
-	            }
-	            if(car.X <= 7){
-	                car.right = true;
-	                car.left = false;
-	            }
-	            if(car.Y >= 259){
-	                car.up = true;
-	                car.down = false;
-	            }
-	            if(car.Y <= 7){
-	                car.up = false;
-	                car.down = true;
-	            }/*
-	            if(up){
-	                car.Y--;
-	            }
-	            if(down){
-	                car.Y++;
-	            }*/
-	            if(car.left){
-	                car.X--;
-	            }
-	            if(car.right){
-	            	car.X++;
-	            }
+	        	for(int i = 0; i < numLanes*carsPerLane; i++){
+		            if(car[i].X >= 283){
+		                car[i].X = 0;
+		                car[i].Y = 25+20*car[i].laneNum;
+		            }
+		            if(car[i].X <= 7){
+		                car[i].right = true;
+		                car[i].left = false;
+		            }
+		            if(car[i].Y >= 259){
+		                car[i].up = true;
+		                car[i].down = false;
+		            }
+		            if(car[i].Y <= 7){
+		                car[i].up = false;
+		                car[i].down = true;
+		            }/*
+		            if(up){
+		                car[i].Y--;
+		            }
+		            if(down){
+		                car[i].Y++;
+		            }*/
+		            if(car[i].left){
+		                car[i].X--;
+		            }
+		            if(car[i].right){
+		            	car[i].X++;
+		            }
+	        	}
 	            try{
-	                Thread.sleep(15);
+	                Thread.sleep(1);
 	            } catch (Exception exc){}
 	            frame.repaint();
 	        }
