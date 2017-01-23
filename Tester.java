@@ -35,10 +35,12 @@ import java.math.*;
 class TollPlaza extends Thread {
 	 	JFrame frame;
 	    DrawPanel drawPanel;
-	    int numLanes = 12;
+	    int numLanes = 10;
 	    int carsPerLane = 24;
 	    int carDimen = 6; //Car is a square
 	    int tollBoothDimen = 15;
+	    int timePerFrame = 15;
+	    
 	    ArrayList<ArrayList> carList = new ArrayList<ArrayList>();
 	    ArrayList<ArrayList> tollBoothList = new ArrayList<ArrayList>();
         public static final int YMULT = 100;
@@ -53,7 +55,7 @@ class TollPlaza extends Thread {
 	    	
 	    	
 	    	private double getWaitTime(){
-	    		return Math.log(1-Math.random())/(-lambda);
+	    		return 3.0;//Math.log(1-Math.random())/(-lambda);
 	    	}
 	    	
 	    	TollBooth(int x, int y, int l){
@@ -64,7 +66,7 @@ class TollPlaza extends Thread {
 	    class Car  {
 	    	private int X;
 		    private int Y;
-		    private int V; //Car velocity
+		    private double V; //Car velocity
 		    private boolean paid;
 		    private int laneNum;
 		    
@@ -74,10 +76,10 @@ class TollPlaza extends Thread {
 		    boolean right = true;
 		    
 		    Car(int x, int y){
-		    	X = x; Y = y; V = 1;
+		    	X = x; Y = y; V = 1.0/timePerFrame;
 		    }
 		    
-		    Car(int x, int y, int v){
+		    Car(int x, int y, double v){
 		    	X = x; Y = y; V = v;
 		    } 
 	    }
@@ -96,7 +98,7 @@ class TollPlaza extends Thread {
 	    	for(int i = 0; i < numLanes; i++){
 	    		for(int j = 0; j < carsPerLane; j++){
 	    			
-	    			Car tmpCar = new Car(XMULT + 20*j, YMULT+20*i);
+	    			Car tmpCar = new Car(XMULT + 20*j, YMULT+20*i, 2.0/timePerFrame);
 		    		tmpCar.laneNum = i;
 		    		((ArrayList<Car>)carList.get(i)).add(tmpCar);	
 	    		}
@@ -204,16 +206,16 @@ class TollPlaza extends Thread {
 			                car.down = true;
 			            }/*
 			            if(up){
-			                car.Y--;
+			                car.Y -= car.V*timePerFrame;
 			            }
 			            if(down){
-			                car.Y++;
+			                car.Y += car.V*timePerFrame;
 			            }*/
 			            if(car.left){
-			                car.X--;
+			            	car.X -= car.V*timePerFrame;
 			            }
 			            if(car.right){
-			            	car.X++;
+			            	car.X += car.V*timePerFrame;
 			            }
 	        		}    
 	        	}
@@ -225,7 +227,7 @@ class TollPlaza extends Thread {
 	        	}
 	        		
 	            try{
-	                Thread.sleep(15);
+	                Thread.sleep(timePerFrame);
 	            } catch (Exception exc){}
 	            frame.repaint();
 	        }
