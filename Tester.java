@@ -20,6 +20,7 @@ class TollPlaza extends Thread {
 	    int numLanes = 12;
 	    int carsPerLane = 14;
 	    int carDimen = 6; //Car is a square
+	    int frameDimen = 600;
 	    ArrayList carList = new ArrayList();
 	    
 	    class Car  {
@@ -77,7 +78,7 @@ class TollPlaza extends Thread {
 
 	        frame.setVisible(true);
 	        frame.setResizable(false);
-	        frame.setSize(300, 300);
+	        frame.setSize(frameDimen, frameDimen);
 	        frame.setLocation(375, 55);
 	        
 	        this.start();
@@ -89,10 +90,7 @@ class TollPlaza extends Thread {
 	        	
 	        	//Get the current size of this component
 	            Dimension d = this.getSize();
-	        	//draw in black
-	            g.setColor(Color.BLACK);
-	            //draw a centered horizontal line
-	            
+	        
 	            g.setColor(Color.BLUE);
 	            g.fillRect(0, 0, this.getWidth(), this.getHeight());
 	            g.setColor(Color.RED);
@@ -101,7 +99,11 @@ class TollPlaza extends Thread {
 	            g.fillRect(6, 6, this.getWidth()-12, this.getHeight()-12);
 	            g.setColor(Color.BLACK);
 	            
+	            //draw a centered horizontal line
 	            g.drawLine(this.getWidth()/2,0,this.getWidth()/2,this.getHeight());
+	            g.drawLine(this.getWidth()/2 + 50,0,this.getWidth()/2 + 50,this.getHeight());
+	            g.drawLine(this.getWidth()/2 - 50,0,this.getWidth()/2 - 50,this.getHeight());
+	            
 	            
 	            for(int i = 0; i < numLanes; i++){
 		    		for(int j = 0; j < carsPerLane; j++){
@@ -117,7 +119,7 @@ class TollPlaza extends Thread {
 	        	for(int i = 0; i < numLanes; i++){
 	        		for(int j = 0; j < ((ArrayList)carList.get(i)).size(); j++){
 	        			Car car = ((Car)((ArrayList)carList.get(i)).get(j));
-			            if( car.X >= 283){
+			            if( car.X >= (frame.getWidth()-17)){
 			            	car.X = 0;
 			            	car.Y = 25+20*car.laneNum;
 			            }
