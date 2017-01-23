@@ -38,14 +38,19 @@ class TollPlaza extends Thread {
 	    int numLanes = 12;
 	    int carsPerLane = 24;
 	    int carDimen = 6; //Car is a square
+	    int tollBoothDimen = 15;
 	    ArrayList<ArrayList> carList = new ArrayList<ArrayList>();
+	    ArrayList<ArrayList> tollBoothList = new ArrayList<ArrayList>();
         public static final int YMULT = 100;
 	    public static final int XMULT = 7;
+	    public static final int frameLength = 500;
+	    public static final int frameWidth = 500;
 	    
 	    class TollBooth {
 	    	private int X;
 	    	private int Y;
 	    	private int lambda;
+	    	
 	    	
 	    	private double getWaitTime(){
 	    		return Math.log(1-Math.random())/(-lambda);
@@ -82,18 +87,28 @@ class TollPlaza extends Thread {
 	    		moveIt(carList);
 	    }
 	    
-	    
 	    TollPlaza(){
 	    	
 	    	for(int i = 0; i < numLanes; i++){
 	    		carList.add(new ArrayList());
+	    		tollBoothList.add(new ArrayList());
 	    	}
 	    	for(int i = 0; i < numLanes; i++){
 	    		for(int j = 0; j < carsPerLane; j++){
+	    			
 	    			Car tmpCar = new Car(XMULT + 20*j, YMULT+20*i);
 		    		tmpCar.laneNum = i;
-		    		((ArrayList<Car>)carList.get(i)).add(tmpCar);
+		    		((ArrayList<Car>)carList.get(i)).add(tmpCar);	
 	    		}
+	    		
+	    		TollBooth tmpToll1 = new TollBooth(frameWidth/2,  YMULT+20*i,3);
+	    		TollBooth tmpToll2 = new TollBooth(frameWidth/2-50,  YMULT+20*i,3);
+	    		TollBooth tmpToll3 = new TollBooth(frameWidth/2+50,  YMULT+20*i,3);
+	    		
+	    		tollBoothList.get(i).add(tmpToll1);
+	    		tollBoothList.get(i).add(tmpToll2);
+	    		tollBoothList.get(i).add(tmpToll3);
+	    		
 	    	}
 	    }
 	    
@@ -133,11 +148,22 @@ class TollPlaza extends Thread {
 	            g.fillRect(3, 3, this.getWidth()-carDimen, this.getHeight()-carDimen);
 	            g.setColor(Color.WHITE);
 	            g.fillRect(6, 6, this.getWidth()-12, this.getHeight()-12);
-	            g.setColor(Color.BLACK);
+	            g.setColor(Color.GRAY);
 	            
+	            for(int i = 0; i < carList.size(); i++){
+		    		for(int j = 0; j < ((ArrayList)tollBoothList.get(i)).size(); j++){
+		    			
+		    			TollBooth tmpTollBooth = ((TollBooth) ((ArrayList)tollBoothList.get(i)).get(j));
+		    			g.fillRect(tmpTollBooth.X-8, tmpTollBooth.Y-3, tollBoothDimen, tollBoothDimen);
+		    			
+		    		}
+		    	}
+	            
+	            
+	            g.setColor(Color.BLACK);
 	            g.drawLine(this.getWidth()/2,0,this.getWidth()/2,this.getHeight());
-                    g.drawLine(this.getWidth()/2+12,0,this.getWidth()/2+12,this.getHeight());
-                     g.drawLine(this.getWidth()/2-12,0,this.getWidth()/2-12,this.getHeight());
+                g.drawLine(this.getWidth()/2+50,0,this.getWidth()/2+50,this.getHeight());
+                g.drawLine(this.getWidth()/2-50,0,this.getWidth()/2-50,this.getHeight());
                     
 	            for(int i = 0; i < carList.size(); i++){
 		    		for(int j = 0; j < ((ArrayList)carList.get(i)).size(); j++){
