@@ -14,15 +14,28 @@ import java.util.*;
  */
 
 
+import java.math.*;
+
+
+/*
+ * TODO:
+ * 
+ * function for merging two cars
+ * stop bouncing off walls
+ * Add traffic.java code 
+ * 
+ */
+
+
 class TollPlaza extends Thread {
 	 	JFrame frame;
 	    DrawPanel drawPanel;
 	    int numLanes = 12;
-	    int carsPerLane = 14;
+	    int carsPerLane = 24;
 	    int carDimen = 6; //Car is a square
-	    int frameDimen = 600;
 	    ArrayList carList = new ArrayList();
-	    
+            public static final int YMULT = 100;
+	    public static final int XMULT = 7;
 	    class Car  {
 	    	private int X;
 		    private int Y;
@@ -57,7 +70,7 @@ class TollPlaza extends Thread {
 	    	}
 	    	for(int i = 0; i < numLanes; i++){
 	    		for(int j = 0; j < carsPerLane; j++){
-	    			Car tmpCar = new Car(7 + 20*j, 25+20*i);
+	    			Car tmpCar = new Car(XMULT + 20*j, YMULT+20*i);
 		    		tmpCar.laneNum = i;
 		    		((ArrayList)carList.get(i)).add(tmpCar);
 	    		}
@@ -78,8 +91,8 @@ class TollPlaza extends Thread {
 
 	        frame.setVisible(true);
 	        frame.setResizable(false);
-	        frame.setSize(frameDimen, frameDimen);
-	        frame.setLocation(375, 55);
+	        frame.setSize(500, 500);
+	        frame.setLocation(775, 455);
 	        
 	        this.start();
 
@@ -90,21 +103,22 @@ class TollPlaza extends Thread {
 	        	
 	        	//Get the current size of this component
 	            Dimension d = this.getSize();
-	        
-	            g.setColor(Color.BLUE);
+	        	//draw in black
+	            g.setColor(Color.BLACK);
+	            //draw a centered horizontal line
+	            
+	            g.setColor(Color.GREEN);
 	            g.fillRect(0, 0, this.getWidth(), this.getHeight());
-	            g.setColor(Color.RED);
+	            g.setColor(Color.ORANGE);
 	            g.fillRect(3, 3, this.getWidth()-carDimen, this.getHeight()-carDimen);
 	            g.setColor(Color.WHITE);
 	            g.fillRect(6, 6, this.getWidth()-12, this.getHeight()-12);
 	            g.setColor(Color.BLACK);
 	            
-	            //draw a centered horizontal line
 	            g.drawLine(this.getWidth()/2,0,this.getWidth()/2,this.getHeight());
-	            g.drawLine(this.getWidth()/2 + 50,0,this.getWidth()/2 + 50,this.getHeight());
-	            g.drawLine(this.getWidth()/2 - 50,0,this.getWidth()/2 - 50,this.getHeight());
-	            
-	            
+                    g.drawLine(this.getWidth()/2+12,0,this.getWidth()/2+12,this.getHeight());
+                     g.drawLine(this.getWidth()/2-12,0,this.getWidth()/2-12,this.getHeight());
+                    
 	            for(int i = 0; i < numLanes; i++){
 		    		for(int j = 0; j < carsPerLane; j++){
 		    			Car tmpCar = ((Car)((ArrayList)carList.get(i)).get(j));
@@ -119,9 +133,9 @@ class TollPlaza extends Thread {
 	        	for(int i = 0; i < numLanes; i++){
 	        		for(int j = 0; j < ((ArrayList)carList.get(i)).size(); j++){
 	        			Car car = ((Car)((ArrayList)carList.get(i)).get(j));
-			            if( car.X >= (frame.getWidth()-17)){
+			            if( car.X >= 480){
 			            	car.X = 0;
-			            	car.Y = 25+20*car.laneNum;
+			            	car.Y = YMULT+20*car.laneNum;
 			            }
 			            if(car.X <= 7){
 			                car.right = true;
@@ -150,7 +164,7 @@ class TollPlaza extends Thread {
 	        		}    
 	        	}
 	            try{
-	                Thread.sleep(15);
+	                Thread.sleep(5);
 	            } catch (Exception exc){}
 	            frame.repaint();
 	        }
