@@ -11,8 +11,9 @@ import java.util.*;
 /*
  * TODO:
  * 
+ * toll booth object
+ * 
  * function for merging two cars
- * stop bouncing off walls
  * Add traffic.java code 
  * 
  */
@@ -38,12 +39,28 @@ class TollPlaza extends Thread {
 	    int carsPerLane = 24;
 	    int carDimen = 6; //Car is a square
 	    ArrayList<ArrayList> carList = new ArrayList<ArrayList>();
-            public static final int YMULT = 100;
+        public static final int YMULT = 100;
 	    public static final int XMULT = 7;
+	    
+	    class TollBooth {
+	    	private int X;
+	    	private int Y;
+	    	private int lambda;
+	    	
+	    	private double getWaitTime(){
+	    		return Math.log(1-Math.random())/(-lambda);
+	    	}
+	    	
+	    	TollBooth(int x, int y, int l){
+	    		X = x; Y = y; lambda = l;
+	    	}
+	    }
+	    
 	    class Car  {
 	    	private int X;
 		    private int Y;
 		    private int V; //Car velocity
+		    private boolean paid;
 		    private int laneNum;
 		    
 		    boolean up = false;
@@ -57,15 +74,14 @@ class TollPlaza extends Thread {
 		    
 		    Car(int x, int y, int v){
 		    	X = x; Y = y; V = v;
-		    }
-		    
-		    
+		    } 
 	    }
 	    
 	    @Override
 	    public void run(){
 	    		moveIt(carList);
 	    }
+	    
 	    
 	    TollPlaza(){
 	    	
@@ -96,7 +112,7 @@ class TollPlaza extends Thread {
 	        frame.setVisible(true);
 	        frame.setResizable(false);
 	        frame.setSize(500, 500);
-	        frame.setLocation(775, 455);
+	        frame.setLocation(375, 55);
 	        
 	        this.start();
 
