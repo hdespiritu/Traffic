@@ -2,6 +2,7 @@ package my.MCM;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
 
 /*
  * TODO:
@@ -17,9 +18,9 @@ class TollPlaza extends Thread {
 	 	JFrame frame;
 	    DrawPanel drawPanel;
 	    int numLanes = 12;
-	    int carsPerLane = 4;
+	    int carsPerLane = 14;
 	    int carDimen = 6; //Car is a square
-	    Car[] carArr = new Car[numLanes*carsPerLane];
+	    ArrayList carList = new ArrayList();
 	    
 	    class Car  {
 	    	private int X;
@@ -45,21 +46,21 @@ class TollPlaza extends Thread {
 	    
 	    @Override
 	    public void run(){
-	    		moveIt(carArr);
+	    		moveIt(carList);
 	    }
 	    
 	    TollPlaza(){
 	    	
-	    	for(int i= 0; i < numLanes; i++){
+	    	for(int i = 0; i < numLanes; i++){
+	    		carList.add(new ArrayList());
+	    	}
+	    	for(int i = 0; i < numLanes; i++){
 	    		for(int j = 0; j < carsPerLane; j++){
 	    			Car tmpCar = new Car(7 + 20*j, 25+20*i);
 		    		tmpCar.laneNum = i;
-		    		carArr[i*4+j] = tmpCar;
+		    		((ArrayList)carList.get(i)).add(tmpCar);
 	    		}
-	    		
-	    		
 	    	}
-
 	    }
 	    
 	    public void merge(){
@@ -102,48 +103,52 @@ class TollPlaza extends Thread {
 	            
 	            g.drawLine(this.getWidth()/2,0,this.getWidth()/2,this.getHeight());
 	            
-	            
-	            for(int i = 0; i < numLanes*carsPerLane; i++){
-	            	g.fillRect(carArr[i].X, carArr[i].Y, 6, 6);
-	            }
-	            
+	            for(int i = 0; i < numLanes; i++){
+		    		for(int j = 0; j < carsPerLane; j++){
+		    			Car tmpCar = ((Car)((ArrayList)carList.get(i)).get(j));
+		    			g.fillRect(tmpCar.X, tmpCar.Y, carDimen, carDimen);
+		    		}
+		    	}
 	        }
 	    }
 
-	    private void moveIt(Car[] car) {
+	    private void moveIt(ArrayList carList) {
 	        while(true){
-	        	for(int i = 0; i < numLanes*carsPerLane; i++){
-		            if(car[i].X >= 283){
-		                car[i].X = 0;
-		                car[i].Y = 25+20*car[i].laneNum;
-		            }
-		            if(car[i].X <= 7){
-		                car[i].right = true;
-		                car[i].left = false;
-		            }
-		            if(car[i].Y >= 259){
-		                car[i].up = true;
-		                car[i].down = false;
-		            }
-		            if(car[i].Y <= 7){
-		                car[i].up = false;
-		                car[i].down = true;
-		            }/*
-		            if(up){
-		                car[i].Y--;
-		            }
-		            if(down){
-		                car[i].Y++;
-		            }*/
-		            if(car[i].left){
-		                car[i].X--;
-		            }
-		            if(car[i].right){
-		            	car[i].X++;
-		            }
+	        	for(int i = 0; i < numLanes; i++){
+	        		for(int j = 0; j < ((ArrayList)carList.get(i)).size(); j++){
+	        			Car car = ((Car)((ArrayList)carList.get(i)).get(j));
+			            if( car.X >= 283){
+			            	car.X = 0;
+			            	car.Y = 25+20*car.laneNum;
+			            }
+			            if(car.X <= 7){
+			                car.right = true;
+			                car.left = false;
+			            }
+			            if(car.Y >= 259){
+			                car.up = true;
+			                car.down = false;
+			            }
+			            if(car.Y <= 7){
+			                car.up = false;
+			                car.down = true;
+			            }/*
+			            if(up){
+			                car.Y--;
+			            }
+			            if(down){
+			                car.Y++;
+			            }*/
+			            if(car.left){
+			                car.X--;
+			            }
+			            if(car.right){
+			            	car.X++;
+			            }
+	        		}    
 	        	}
 	            try{
-	                Thread.sleep(1);
+	                Thread.sleep(15);
 	            } catch (Exception exc){}
 	            frame.repaint();
 	        }
