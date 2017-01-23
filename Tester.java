@@ -1,7 +1,11 @@
 package my.MCM;
 
 import javax.swing.*;
+
+import my.MCM.TollPlaza.Car;
+
 import java.awt.*;
+import java.awt.List;
 import java.util.*;
 
 /*
@@ -33,7 +37,7 @@ class TollPlaza extends Thread {
 	    int numLanes = 12;
 	    int carsPerLane = 24;
 	    int carDimen = 6; //Car is a square
-	    ArrayList carList = new ArrayList();
+	    ArrayList<ArrayList> carList = new ArrayList<ArrayList>();
             public static final int YMULT = 100;
 	    public static final int XMULT = 7;
 	    class Car  {
@@ -72,7 +76,7 @@ class TollPlaza extends Thread {
 	    		for(int j = 0; j < carsPerLane; j++){
 	    			Car tmpCar = new Car(XMULT + 20*j, YMULT+20*i);
 		    		tmpCar.laneNum = i;
-		    		((ArrayList)carList.get(i)).add(tmpCar);
+		    		((ArrayList<Car>)carList.get(i)).add(tmpCar);
 	    		}
 	    	}
 	    }
@@ -119,8 +123,8 @@ class TollPlaza extends Thread {
                     g.drawLine(this.getWidth()/2+12,0,this.getWidth()/2+12,this.getHeight());
                      g.drawLine(this.getWidth()/2-12,0,this.getWidth()/2-12,this.getHeight());
                     
-	            for(int i = 0; i < numLanes; i++){
-		    		for(int j = 0; j < carsPerLane; j++){
+	            for(int i = 0; i < carList.size(); i++){
+		    		for(int j = 0; j < ((ArrayList)carList.get(i)).size(); j++){
 		    			Car tmpCar = ((Car)((ArrayList)carList.get(i)).get(j));
 		    			g.fillRect(tmpCar.X, tmpCar.Y, carDimen, carDimen);
 		    		}
@@ -128,14 +132,22 @@ class TollPlaza extends Thread {
 	        }
 	    }
 
-	    private void moveIt(ArrayList carList) {
+	    private void moveIt(ArrayList<ArrayList> carList) {
+	    	ArrayList deleted = new ArrayList();
 	        while(true){
 	        	for(int i = 0; i < numLanes; i++){
-	        		for(int j = 0; j < ((ArrayList)carList.get(i)).size(); j++){
-	        			Car car = ((Car)((ArrayList)carList.get(i)).get(j));
+	        		final int numCarsLane = ((ArrayList)carList.get(i)).size();
+	        		for(int j = 0; j < numCarsLane; j++){
+	        			ArrayList lane = (ArrayList)carList.get(i);
+	        			Car car = (Car)lane.get(j);
+	        			
+	        			
 			            if( car.X >= 480){
-			            	car.X = 0;
-			            	car.Y = YMULT+20*car.laneNum;
+			            	car.X = -1;
+			            	car.Y = -1;
+			            	
+			            	deleted.add(new int[]{i,j});
+			            	
 			            }
 			            if(car.X <= 7){
 			                car.right = true;
@@ -163,8 +175,15 @@ class TollPlaza extends Thread {
 			            }
 	        		}    
 	        	}
+	        	for(int i= 0; i < deleted.size(); i++){
+	        		int[] pair = (int[])deleted.get(i);
+	        		ArrayList lane = (ArrayList)carList.get(pair[0]);
+        			lane.set(pair[1], new Car(-1,-1));
+	        		carList.set(pair[0],lane);
+	        	}
+	        		
 	            try{
-	                Thread.sleep(5);
+	                Thread.sleep(15);
 	            } catch (Exception exc){}
 	            frame.repaint();
 	        }
