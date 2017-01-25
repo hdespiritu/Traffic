@@ -8,25 +8,15 @@ import java.awt.*;
 import java.awt.List;
 import java.util.*;
 
-/*
- * TODO:
- * 
- * toll booth object
- * 
- * function for merging two cars
- * Add traffic.java code 
- * 
- */
-
-
 import java.math.*;
 
 
 /*
  * TODO:
  * 
- * function for merging two cars
- * stop bouncing off walls
+ * Stop cars at toll booth
+ * Stop cars from crashing into each other
+ * Generate cars according to Poisson Distribution
  * Add traffic.java code 
  * 
  */
@@ -36,10 +26,11 @@ class TollPlaza extends Thread {
 	 	JFrame frame;
 	    DrawPanel drawPanel;
 	    int numLanes = 10;
-	    int carsPerLane = 24;
+	    int carsPerLane = 5;
 	    int carDimen = 6; //Car is a square
 	    int tollBoothDimen = 15;
-	    int timePerFrame = 15;
+	    int timePerFrame = 20;
+	    int waitLinePos = -1;
 	    
 	    ArrayList<ArrayList> carList = new ArrayList<ArrayList>();
 	    ArrayList<ArrayList> tollBoothList = new ArrayList<ArrayList>();
@@ -51,7 +42,8 @@ class TollPlaza extends Thread {
 	    class TollBooth {
 	    	private int X;
 	    	private int Y;
-	    	private int lambda;
+	    	private int lambda; //service time of a tollbooth
+	    	private boolean isOccupied;
 	    	
 	    	
 	    	private double getWaitTime(){
@@ -67,6 +59,7 @@ class TollPlaza extends Thread {
 	    	private int X;
 		    private int Y;
 		    private double V; //Car velocity
+		    private double A; //Car acceleration
 		    private boolean paid;
 		    private int laneNum;
 		    
@@ -76,18 +69,15 @@ class TollPlaza extends Thread {
 		    boolean right = true;
 		    
 		    Car(int x, int y){
-		    	X = x; Y = y; V = 1.0/timePerFrame;
+		    	X = x; Y = y; V = 1.0/timePerFrame; A = 0;
 		    }
 		    
 		    Car(int x, int y, double v){
-		    	X = x; Y = y; V = v;
-		    } 
+		    	X = x; Y = y; V = v; A = 0;
+		    }
+		    
 	    }
-	    
-	    @Override
-	    public void run(){
-	    		moveIt(carList);
-	    }
+	   
 	    
 	    TollPlaza(){
 	    	
@@ -103,8 +93,9 @@ class TollPlaza extends Thread {
 		    		((ArrayList<Car>)carList.get(i)).add(tmpCar);	
 	    		}
 	    		
-	    		TollBooth tmpToll1 = new TollBooth(frameWidth/2,  YMULT+20*i,3);
-	    		TollBooth tmpToll2 = new TollBooth(frameWidth/2-50,  YMULT+20*i,3);
+	    		
+	    		TollBooth tmpToll1 = new TollBooth(frameWidth/2-50,  YMULT+20*i,3);
+	    		TollBooth tmpToll2 = new TollBooth(frameWidth/2,  YMULT+20*i,3);
 	    		TollBooth tmpToll3 = new TollBooth(frameWidth/2+50,  YMULT+20*i,3);
 	    		
 	    		tollBoothList.get(i).add(tmpToll1);
@@ -114,8 +105,10 @@ class TollPlaza extends Thread {
 	    	}
 	    }
 	    
-	    public void merge(){
-	    	
+	    
+	    @Override
+	    public void run(){
+	    		moveIt(carList);
 	    }
 	    
 	    public void go() {
@@ -166,6 +159,11 @@ class TollPlaza extends Thread {
 	            g.drawLine(this.getWidth()/2,0,this.getWidth()/2,this.getHeight());
                 g.drawLine(this.getWidth()/2+50,0,this.getWidth()/2+50,this.getHeight());
                 g.drawLine(this.getWidth()/2-50,0,this.getWidth()/2-50,this.getHeight());
+                g.setColor(Color.RED);
+                //The wait line (wait if tollbooths are occupied in a lane)
+                waitLinePos = this.getWidth()/2-75;
+                g.drawLine(waitLinePos,0,waitLinePos,this.getHeight());
+                g.setColor(Color.BLACK);
                     
 	            for(int i = 0; i < carList.size(); i++){
 		    		for(int j = 0; j < ((ArrayList)carList.get(i)).size(); j++){
@@ -179,18 +177,58 @@ class TollPlaza extends Thread {
 	    private void moveIt(ArrayList<ArrayList> carList) {
 	    	ArrayList deleted = new ArrayList();
 	        while(true){
-	        	for(int i = 0; i < numLanes; i++){
-	        		final int numCarsLane = ((ArrayList)carList.get(i)).size();
+	        	for(int laneNum = 0; laneNum < numLanes; laneNum++){
+	        		final int numCarsLane = ((ArrayList)carList.get(laneNum)).size();
 	        		for(int j = 0; j < numCarsLane; j++){
-	        			ArrayList lane = (ArrayList)carList.get(i);
+	        			ArrayList lane = (ArrayList)carList.get(laneNum);
 	        			Car car = (Car)lane.get(j);
-	        			
+	        			int dist2WaitLine = waitLinePos - car.X;
+	        			int numCarsAhead = 0;
+	        			int numEmptyBooths = 0; //Use this with totalBooths to see if need to wait
+	        			int availBoothPos = -1;
+	        		
+	        			//checks availability of tollbooths before reaching wait line
+	        			if ((dist2WaitLine >= 0) && (dist2WaitLine <= 5*(car.V*timePerFrame)))
+	        			{
+	        				
+	        				boolean isFull = true;
+	        				for(int k=0; k < tollBoothList.get(laneNum).size(); k++ ){
+	        					//count the number of available tollbooths
+	        					if(!((TollBooth)tollBoothList.get(laneNum).get(k)).isOccupied)
+	        					{
+	        						isFull = false;
+	        						numEmptyBooths++;
+	        						availBoothPos = ((TollBooth)tollBoothList.get(laneNum).get(k)).X;
+	        					}
+	        				}
+	        				for(int k = j+1; k < numCarsLane; k++){
+	        					//count the number of cars ahead
+	        					if(((Car)lane.get(k)).X < 0)//Don't include off-screen cars
+	        						break;
+	        					numCarsAhead++;
+	        				}
+	        				
+	        				/*TODO:
+	        				 *Now that # of empty booths & # of cars ahead have been calculated,
+	        				 *we need to find a way of changing acceleration & velocity of
+	        				 *the car to handle the case when
+	        				 *
+	        				 * 1)There's an empty booth (use availBoothPos)
+	        				 * 2)There are no empty booths & car is first to wait in line
+	        				 * 3)There are no empty booths & car is NOT first to wait in line
+	        				 * 4)Generally handle following distance when waiting in line
+	        				 * 
+	        				 * 
+	        				 */
+	        			}
+	        		 
+	        				
 	        			
 			            if( car.X >= 480){
 			            	car.X = -1;
 			            	car.Y = -1;
 			            	
-			            	deleted.add(new int[]{i,j});
+			            	deleted.add(new int[]{laneNum,j});
 			            	
 			            }
 			            if(car.X <= 7){
